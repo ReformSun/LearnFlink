@@ -37,7 +37,7 @@ public class TestMain4 {
 
         KafkaTableSource kafkaTableSource=jsonTableSourceBuilder.build();
         tableEnv.registerTableSource("kafkasource", kafkaTableSource);
-        Table sqlResult = tableEnv.sqlQuery("SELECT SUM(b) FROM kafkasource GROUP BY TUMBLE(rtime, INTERVAL '10' SECO)");
+        Table sqlResult = tableEnv.sqlQuery("SELECT SUM(b) FROM kafkasource GROUP BY TUMBLE(rtime, INTERVAL '10' SECOND)");
 
         CsvTableSink csvTableSink = new CsvTableSink("file:///E:\\Asunjihua\\idea\\LearnFlink\\src\\main\\resources\\aaaaaa.csv", ",", 1, FileSystem.WriteMode.OVERWRITE);
         sqlResult.writeToSink(csvTableSink);
