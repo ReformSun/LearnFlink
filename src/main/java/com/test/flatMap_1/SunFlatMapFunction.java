@@ -23,4 +23,6 @@ public class SunFlatMapFunction implements FlatMapFunction<String, SunWordWithKe
             i ++;
         }
     }
+
+
 }

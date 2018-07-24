@@ -1,5 +1,6 @@
 package com.test.learnWindows;
 
+import model.SunWordWithCount;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.streaming.api.datastream.DataStream;
@@ -9,7 +10,7 @@ import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindo
 import org.apache.flink.streaming.api.windowing.time.Time;
 import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
-import test.SunWordWithCount;
+
 
 public class TestMain1 {
     public static void main(String[] args) throws Exception {
