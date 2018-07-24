@@ -13,8 +13,7 @@ public class Test {
 
         DataStream<String> dataStreamSource = env.readTextFile("E:\\Asunjihua\\idea\\LearnFlink\\src\\main\\resources\\test.txt");
         SunFunctionStates1 sunFunctionStates1 = new SunFunctionStates1();
-        DataStream<SunWordWithCount> dataStream =  dataStreamSource.flatMap(sunFunctionStates1);
-        dataStream.keyBy("word").sum("count");
+        DataStream<SunWordWithCount> dataStream =  dataStreamSource.keyBy("word").flatMap(sunFunctionStates1);
 
         dataStream.print().setParallelism(1);
 
