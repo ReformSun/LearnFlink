@@ -21,7 +21,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static org.apache.flink.api.common.typeinfo.BasicTypeInfo.INT_TYPE_INFO;
+import static org.apache.flink.api.common.typeinfo.BasicTypeInfo.*;
 
 public class TestMain3 {
     public static void main(String[] args) throws Exception {
@@ -42,41 +42,29 @@ public class TestMain3 {
         TableSchemaBuilder tableSchemaBuilder= TableSchema.builder();
 
 //        jsonTableSourceBuilder.withSchema(tableSchemaBuilder.field("a",Types.STRING).field("b",Types.INT).field("rtime",Types.SQL_TIMESTAMP).build()).withRowtimeAttribute("rtime",new ExistingField("rtime"),new BoundedOutOfOrderTimestamps(30000L));
-        jsonTableSourceBuilder.withSchema(tableSchemaBuilder.field("a",Types.STRING).field("b",Types.INT).field("rtime",Types.SQL_TIMESTAMP).build()).withProctimeAttribute("rtime");
+        jsonTableSourceBuilder.withSchema(tableSchemaBuilder.field("a",Types.STRING).field("b",Types.INT).field("_sysTime",Types.SQL_TIMESTAMP).build()).withProctimeAttribute("_sysTime");
 
         KafkaTableSource kafkaTableSource=jsonTableSourceBuilder.build();
 
 
         tableEnv.registerTableSource("kafkasource", kafkaTableSource);
 
-//        Table table = tableEnv.scan("kafkasource");
-//        Table sqlResult = table.window(Tumble.over("1.minutes").on(
-//"rtime").as("a")).groupBy("a").select("b.sum as num");
+        Table sqlResult = tableEnv.sqlQuery("SELECT a,count(b) AS DDKK FROM kafkasource GROUP BY TUMBLE(_sysTime, INTERVAL '10' SECOND),a");
+        String insertSql="INSERT INTO testflink (a,num) VALUES (?,?)";
+        JDBCAppendTableSink sink = JDBCAppendTableSink.builder()
+                .setDrivername("00org.postgresql.Driver")
+                .setDBUrl("jdbc:postgresql://10.4.247.20:5432/apm_test")
+                .setUsername("apm").setPassword("apm")                .setQuery(insertSql)
 
+                .setParameterTypes(STRING_TYPE_INFO,LONG_TYPE_INFO)
+                .setBatchSize(1)
+                .build();
 
-//        Table sqlResult = table.window(Tumble.over("10.rows").on("rtime").as("a")).groupBy("a").select("b.sum");
-
-//        StreamQueryConfig qConfig = new StreamQueryConfig();
-//
-
-
-
-        Table sqlResult = tableEnv.sqlQuery("SELECT count(a) FROM kafkasource");
-//        String insertSql="INSERT INTO testflink (num) VALUES (?)";
-//        JDBCAppendTableSink sink = JDBCAppendTableSink.builder()
-//                .setDrivername("org.postgresql.Driver")
-//                .setDBUrl("jdbc:postgresql://10.4.247.20:5432/apm_test")
-//                .setUsername("apm").setPassword("apm")
-//                .setQuery(insertSql)
-//                .setParameterTypes(INT_TYPE_INFO)
-//                .setBatchSize(1)
-//                .build();
-
-        CsvTableSink csvTableSink = new CsvTableSink("file:///E:\\Asunjihua\\idea\\LearnFlink\\src\\main\\resources\\aaaaaa.csv", ",", 1, FileSystem.WriteMode.OVERWRITE);
+//        CsvTableSink csvTableSink = new CsvTableSink("file:///E:\\Asunjihua\\idea\\LearnFlink\\src\\main\\resources\\aaaaaa.csv", ",", 1, FileSystem.WriteMode.OVERWRITE);
 //        csvTableSink.configure(new String[]{"sum"},new TypeInformation[]{Types.INT});
         //将数据写出去
 //        sqlResult.printSchema();
-        sqlResult.writeToSink(csvTableSink);
+        sqlResult.writeToSink(sink);
         //执行
         sEnv.execute();
     }

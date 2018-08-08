@@ -1,6 +1,6 @@
 package com.sunny.flink.test;
 
-import org.apache.flink.api.common.functions.ReduceFunction;
+        import org.apache.flink.api.common.functions.ReduceFunction;
 
 public class SunReduceFunction implements ReduceFunction<SunWordWithCount> {
     @Override

@@ -3,6 +3,8 @@ package com.test.learnWindows;
 import model.SunWordWithCount;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
+import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
+import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
@@ -15,6 +17,8 @@ import org.apache.flink.util.Collector;
 public class TestMain1 {
     public static void main(String[] args) throws Exception {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
+        env.enableCheckpointing(60);
+        env.setStateBackend(new RocksDBStateBackend("file:///E:\\Asunjihua\\data\\rocksdb"));
 
         // get input data by connecting to the socket
         DataStream<String> text = env.socketTextStream("localhost", 9000, "\n");
@@ -42,6 +46,8 @@ public class TestMain1 {
 
 
         windowCounts.print().setParallelism(1);
+
+//        windowCounts.writeAsText(".\\src\\main\\resources\\test1.txt", FileSystem.WriteMode.NO_OVERWRITE);
 
         env.execute("Socket Window WordCount");
     }
