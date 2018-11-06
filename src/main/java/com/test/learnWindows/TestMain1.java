@@ -4,24 +4,20 @@ import model.SunWordWithCount;
 import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.common.functions.ReduceFunction;
 import org.apache.flink.contrib.streaming.state.RocksDBStateBackend;
-import org.apache.flink.core.fs.FileSystem;
 import org.apache.flink.streaming.api.datastream.DataStream;
-import org.apache.flink.streaming.api.datastream.WindowedStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
-import org.apache.flink.streaming.api.windowing.assigners.TumblingEventTimeWindows;
 import org.apache.flink.streaming.api.windowing.time.Time;
-import org.apache.flink.streaming.api.windowing.windows.Window;
 import org.apache.flink.util.Collector;
 
 
 public class TestMain1 {
     public static void main(String[] args) throws Exception {
         final StreamExecutionEnvironment env = StreamExecutionEnvironment.getExecutionEnvironment();
-        env.enableCheckpointing(60);
-        env.setStateBackend(new RocksDBStateBackend("file:///E:\\Asunjihua\\data\\rocksdb"));
+//        env.enableCheckpointing(60000);
+//        env.setStateBackend(new RocksDBStateBackend("file:////Users/apple/Desktop/rockdata"));
 
         // get input data by connecting to the socket
-        DataStream<String> text = env.socketTextStream("localhost", 9000, "\n");
+        DataStream<String> text = env.socketTextStream("172.31.35.58", 9000, "\n");
 
         // parse the data, group it, window it, and aggregate the counts
         DataStream<SunWordWithCount> windowCounts = text
@@ -34,7 +30,7 @@ public class TestMain1 {
                         }
                     }
                 }).keyBy("word")
-                .timeWindow(Time.seconds(6), Time.seconds(2))
+                .timeWindow(Time.seconds(60), Time.seconds(20))
                 .reduce(new ReduceFunction<SunWordWithCount>() {
                     @Override
                     public SunWordWithCount reduce(SunWordWithCount a, SunWordWithCount b) {
